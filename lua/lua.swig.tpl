@@ -16,6 +16,8 @@ struct      lua_Debug;
 
 %ignore     lua_pushvfstring;
 %ignore     lua_pushfstring;
+%ignore     luaL_checkoption;
+%ignore     luaL_setfuncs;
 
 %include    "${LUA_SRC}/luaconf.h"
 %include    "${LUA_SRC}/lua.h"
