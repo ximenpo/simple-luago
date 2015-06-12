@@ -1,8 +1,8 @@
 package main
 
-import(
-    "unsafe"
-    . "../lua"
+import (
+	. "../lua"
+	"unsafe"
 )
 
 /*
@@ -11,7 +11,7 @@ import(
 extern  void*	allocator(void *ud, void *ptr, size_t osize, size_t nsize);
 
 */
-import  "C"
+import "C"
 
 //export allocator
 func allocator(ud unsafe.Pointer, ptr unsafe.Pointer, osize uintptr, nsize uintptr) (ret unsafe.Pointer) {
@@ -21,7 +21,7 @@ func allocator(ud unsafe.Pointer, ptr unsafe.Pointer, osize uintptr, nsize uintp
 	} else {
 		ret = C.realloc(ptr, C.size_t(nsize))
 	}
-    return
+	return
 }
 
 func main() {

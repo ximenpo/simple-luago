@@ -10,6 +10,21 @@ import (
 extern  int	myGoCFunc(void* l);
 extern  int	anotherGoCFunc(void* l);
 
+typedef int	(*lua_CFunction)(void* l);
+typedef struct luaL_Reg {
+  const char *name;
+  lua_CFunction func;
+} luaL_Reg;
+
+static  const void* lfuncs(){
+    static  const   luaL_Reg   lfs[]  = {
+        {"myGoCFunc",       myGoCFunc},
+        {"anotherGoCFunc",  anotherGoCFunc},
+        {0,                 0},
+    };
+    return  lfs;
+}
+
 */
 import "C"
 
@@ -30,11 +45,12 @@ func main() {
 	l := LuaL_newstate()
 	LuaL_openlibs(l)
 
-	Lua_register(l, "GoFunc", LuaF_CFunction(C.myGoCFunc))
-	LuaL_dostring(l, `GoFunc('world')`)
+	Lua_createtable(l, 0, 2)
+	LuaL_setfuncs(l, C.lfuncs(), 0)
+	Lua_setglobal(l, "GoLib")
 
-	Lua_register(l, "GoFunc2", LuaF_CFunction(C.anotherGoCFunc))
-	LuaL_dostring(l, `GoFunc2()`)
+	LuaL_dostring(l, `GoLib.myGoCFunc('world')`)
+	LuaL_dostring(l, `GoLib.anotherGoCFunc()`)
 
 	Lua_close(l)
 }

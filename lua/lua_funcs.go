@@ -11,12 +11,38 @@ package lua
 #include    "$.lualib.h"
 #include    "$.lauxlib.h"
 
+static	int	_LuaF_RegLen(void* p){
+	int	len	= 0;
+	if(p != 0){
+		luaL_Reg* r	= (luaL_Reg*)p;
+		while(r->name && r->func){
+			len++;
+			r++;
+		}
+	}
+	return	len;
+}
+
 */
 import "C"
 
 import (
 	"unsafe"
 )
+
+func LuaL_setfuncs(L Struct_SS_lua_State, l unsafe.Pointer, nup int) {
+	C.luaL_setfuncs((*C.lua_State)(unsafe.Pointer(L.Swigcptr())), (*C.luaL_Reg)(l), C.int(nup))
+}
+
+func LuaL_newlibtable(L Struct_SS_lua_State, l unsafe.Pointer) {
+	C.lua_createtable((*C.lua_State)(unsafe.Pointer(L.Swigcptr())), 0, C._LuaF_RegLen(l))
+}
+
+func LuaL_newlib(L Struct_SS_lua_State, l unsafe.Pointer) {
+	LuaL_checkversion(L)
+	LuaL_newlibtable(L, l)
+	LuaL_setfuncs(L, l, 0)
+}
 
 //
 // convert unsafe.Pointer to Lua_State

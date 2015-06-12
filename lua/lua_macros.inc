@@ -134,19 +134,9 @@ static  int     LuaL_loadfile(lua_State *L, const char *f){
     return  luaL_loadfile(L, f);
 }
 
-// TODO: luaL_newlibtable(L, l)
-static  void    LuaL_newlibtable(lua_State *L, luaL_Reg* l, size_t sz) {
-    //luaL_newlibtable(L, l);
-    lua_createtable(L, 0, sz);
-}
+// lua_funcs: luaL_newlibtable(L, l)
 
-// TODO: LuaL_newlib(L, l)
-static  void    LuaL_newlib(lua_State *L, luaL_Reg* l, size_t sz) {
-    //luaL_newlib(L, l);
-    luaL_checkversion(L);
-    lua_createtable(L,0,sz);
-    luaL_setfuncs(L,l,0);
-}
+// lua_funcs: LuaL_newlib(L, l)
 
 static  void    LuaL_argcheck(lua_State *L, int cond, int arg, const char* extramsg) {
     luaL_argcheck(L, cond, arg, extramsg);
