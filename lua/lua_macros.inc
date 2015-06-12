@@ -2,9 +2,9 @@
 //
 //  function helper
 //
-typedef void(*LuaF_Ptr)();
-static  LuaF_Ptr   LuaF_AsPtr(void* fp){
-    return  (LuaF_Ptr)fp;
+typedef void(*_LuaF_FuncPtr)();
+static  _LuaF_FuncPtr   LuaF_Ptr(void* fp){
+    return  (_LuaF_FuncPtr)fp;
 }
 
 //

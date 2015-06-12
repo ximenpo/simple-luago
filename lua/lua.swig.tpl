@@ -9,7 +9,7 @@
 #include    "$.lua.h"
 #include    "$.lualib.h"
 #include    "$.lauxlib.h"
-#include    "lua_mfuncs.inc"
+#include    "lua_macros.inc"
 %}
 
 struct      lua_Debug;
@@ -21,4 +21,4 @@ struct      lua_Debug;
 %include    "${LUA_SRC}/lua.h"
 %include    "${LUA_SRC}/lualib.h"
 %include    "${LUA_SRC}/lauxlib.h"
-%include    "lua_mfuncs.inc"
+%include    "lua_macros.inc"
