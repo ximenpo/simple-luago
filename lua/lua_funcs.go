@@ -35,7 +35,7 @@ func LuaL_setfuncs(L Struct_SS_lua_State, l unsafe.Pointer, nup int) {
 }
 
 func LuaL_newlibtable(L Struct_SS_lua_State, l unsafe.Pointer) {
-	C.lua_createtable((*C.lua_State)(unsafe.Pointer(L.Swigcptr())), 0, C._LuaF_RegLen(l))
+	C.lua_createtable((*C.lua_State)(unsafe.Pointer(L.Swigcptr())), 0, LuaF_RegLen(l))
 }
 
 func LuaL_newlib(L Struct_SS_lua_State, l unsafe.Pointer) {
@@ -50,6 +50,10 @@ func LuaL_newlib(L Struct_SS_lua_State, l unsafe.Pointer) {
 func LuaF_Handle(lp unsafe.Pointer) (ret SwigcptrStruct_SS_lua_State) {
 	ret = SwigcptrStruct_SS_lua_State(uintptr(lp))
 	return
+}
+
+func LuaF_RegLen(p unsafe.Pointer) C.int  {
+	return	C._LuaF_RegLen(p)
 }
 
 //

@@ -39,11 +39,11 @@ func main() {
 	l := LuaL_newstate()
 	LuaL_openlibs(l)
 
-	Lua_pushglobaltable(l)
-	LuaL_setfuncs(l, C.lfuncs(), 0)
+	LuaL_newlib(l, C.lfuncs())
+	Lua_setglobal(l, "GoLib")
 
-	LuaL_dostring(l, `myGoCFunc('world')`)
-	LuaL_dostring(l, `anotherGoCFunc()`)
+	LuaL_dostring(l, `GoLib.myGoCFunc('world')`)
+	LuaL_dostring(l, `GoLib.anotherGoCFunc()`)
 
 	Lua_close(l)
 }
