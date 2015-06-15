@@ -26,7 +26,7 @@ func LuaU_GetGlobal(L Lua_State, varname string) bool {
 	return (0 != r)
 }
 
-func LuaGoH_SetGlobal(L Lua_State, varname string) bool {
+func LuaU_SetGlobal(L Lua_State, varname string) bool {
 	s := C.CString(varname)
 	defer C.free(unsafe.Pointer(s))
 

@@ -19,9 +19,6 @@ struct      luaL_Stream;
 
 %ignore     lua_pushvfstring;
 %ignore     lua_pushfstring;
-%ignore     luaL_Reg;
-%ignore     luaL_checkoption;
-%ignore     luaL_setfuncs;
 %ignore     lua_isnumber;
 %ignore     lua_isstring;
 %ignore     lua_iscfunction;
@@ -29,6 +26,10 @@ struct      luaL_Stream;
 %ignore     lua_isuserdata;
 %ignore     lua_toboolean;
 %ignore     lua_pushboolean;
+%ignore     luaL_Reg;
+%ignore     luaL_checkoption;
+%ignore     luaL_setfuncs;
+%ignore     luaL_loadbufferx;
 
 %typemap(gotype)    (lua_Number)    "Lua_Number"
 %typemap(gotype)    (lua_Integer)   "Lua_Integer"

@@ -113,17 +113,28 @@ func Lua_pushboolean(L Lua_State, b bool) {
 func LuaL_checkoption(L Lua_State, arg int, def string, lst []string) int {
 	l := make([](*C.char), 0, len(lst)+1)
 	for i := 0; i < len(lst); i++ {
-		S1 := C.CString(lst[i])
-		defer C.free(unsafe.Pointer(S1))
-		l = append(l, S1)
+		s := C.CString(lst[i])
+		defer C.free(unsafe.Pointer(s))
+		l = append(l, s)
 	}
 	l = append(l, nil)
 
-	S2 := C.CString(def)
-	defer C.free(unsafe.Pointer(S2))
+	s := C.CString(def)
+	defer C.free(unsafe.Pointer(s))
 
-	R := C.luaL_checkoption(LuaF_StateCPtr(L), C.int(arg), S2, &l[0])
+	R := C.luaL_checkoption(LuaF_StateCPtr(L), C.int(arg), s, &l[0])
 	return int(R)
+}
+
+func LuaL_loadbufferx(L Lua_State, buff unsafe.Pointer, sz uint, name string, mode string) int {
+	n := C.CString(name)
+	defer C.free(unsafe.Pointer(n))
+
+	m := C.CString(mode)
+	defer C.free(unsafe.Pointer(m))
+
+	r := C.luaL_loadbufferx(LuaF_StateCPtr(L), (*C.char)(buff), C.size_t(sz), n, m)
+	return int(r)
 }
 
 func LuaL_setfuncs(L Lua_State, l unsafe.Pointer, nup int) {

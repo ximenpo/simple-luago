@@ -180,8 +180,8 @@ static  void    LuaL_getmetatable(lua_State *L, const char* n) {
 
 //  TODO: support luaL_opt
 
-static  int     LuaL_loadbuffer(lua_State *L, const char *s, size_t sz, const char *n){
-    return  luaL_loadbuffer(L,s,sz,n);
+static  int     LuaL_loadbuffer(lua_State *L, const void *s, size_t sz, const char *n){
+    return  luaL_loadbuffer(L,(const char *)s,sz,n);
 }
 
 static  void    LuaL_addchar(luaL_Buffer *B, char c) {
