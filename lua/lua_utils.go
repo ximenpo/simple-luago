@@ -43,7 +43,7 @@ func LuaU_InvokeFunc(L Lua_State, nargs int, nresults int, err_code *int, err_ms
 		err_code = &ret
 	}
 
-	switch *err_code = Lua_pcall(L, nargs, nresults, 0); *err_code {
+	switch *err_code = int(Lua_pcall(L, Lua_CInt(nargs), Lua_CInt(nresults), 0)); Lua_CInt(*err_code) {
 	case LUA_OK, LUA_YIELD:
 		{
 			return true

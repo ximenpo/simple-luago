@@ -62,7 +62,7 @@ func (vm *LuaVM) HasRef(ref Lua_Ref) bool {
 }
 
 func (vm *LuaVM) Ref(var_name string) (ref Lua_Ref, ok bool) {
-	ref	= Lua_Ref(LUA_NOREF)
+	ref = Lua_Ref(LUA_NOREF)
 	if !LuaU_GetGlobal(vm.handle, var_name) {
 		return ref, false
 	}
@@ -76,7 +76,7 @@ func (vm *LuaVM) Ref(var_name string) (ref Lua_Ref, ok bool) {
 }
 
 func (vm *LuaVM) UnRef(ref Lua_Ref) bool {
-	LuaL_unref(vm.handle, LUA_REGISTRYINDEX, int(ref))
+	LuaL_unref(vm.handle, LUA_REGISTRYINDEX, Lua_CInt(ref))
 
 	return true
 }
@@ -95,11 +95,13 @@ func (vm *LuaVM) HasVar(var_name string) bool {
 	return R
 }
 
-func (vm *LuaVM) RemoveVar(var_name string) {
+func (vm *LuaVM) RemoveVar(var_name string) bool {
 	Lua_pushnil(vm.handle)
 	if !LuaU_SetGlobal(vm.handle, var_name) {
 		Lua_pop(vm.handle, 1)
+		return false
 	}
+	return true
 }
 
 func (vm *LuaVM) GetVar(var_name string, value interface{}) bool {
@@ -152,7 +154,7 @@ func (vm *LuaVM) Call(func_name string, args ...interface{}) bool {
 
 	for i := 0; i < len(args); i++ {
 		if !LuaU_PushVar(vm.handle, args[i]) {
-			Lua_pop(vm.handle, i+1) // 0, 1, .. i - 1, + LuaU_GetGlobal
+			Lua_pop(vm.handle, Lua_CInt(i+1)) // 0, 1, .. i - 1, + LuaU_GetGlobal
 			return false
 		}
 	}
@@ -167,7 +169,7 @@ func (vm *LuaVM) Invoke(ret_value interface{}, func_name string, args ...interfa
 
 	for i := 0; i < len(args); i++ {
 		if !LuaU_PushVar(vm.handle, args[i]) {
-			Lua_pop(vm.handle, i+1) // 0, 1, .. i - 1, + LuaU_GetGlobal
+			Lua_pop(vm.handle, Lua_CInt(i+1)) // 0, 1, .. i - 1, + LuaU_GetGlobal
 			return false
 		}
 	}
@@ -194,7 +196,7 @@ func (vm *LuaVM) RunFile(file string) bool {
 		Lua_pop(vm.handle, 1)
 		return false
 	}
-	return LuaU_InvokeFunc(vm.handle, 0, LUA_MULTRET, nil, &vm.err_msg)
+	return LuaU_InvokeFunc(vm.handle, 0, int(LUA_MULTRET), nil, &vm.err_msg)
 }
 
 func (vm *LuaVM) RunString(code string) bool {
@@ -203,12 +205,12 @@ func (vm *LuaVM) RunString(code string) bool {
 		Lua_pop(vm.handle, 1)
 		return false
 	}
-	return LuaU_InvokeFunc(vm.handle, 0, LUA_MULTRET, nil, &vm.err_msg)
+	return LuaU_InvokeFunc(vm.handle, 0, int(LUA_MULTRET), nil, &vm.err_msg)
 }
 
 func (vm *LuaVM) RunBuffer(buffer unsafe.Pointer, size uint) bool {
 	if LUA_OK == LuaL_loadbuffer(vm.handle, uintptr(buffer), size, "LuaVM.RunBuffer") {
-		return LuaU_InvokeFunc(vm.handle, 0, LUA_MULTRET, nil, &vm.err_msg)
+		return LuaU_InvokeFunc(vm.handle, 0, int(LUA_MULTRET), nil, &vm.err_msg)
 	}
 	vm.err_msg = Lua_tostring(vm.handle, -1)
 	Lua_pop(vm.handle, 1)

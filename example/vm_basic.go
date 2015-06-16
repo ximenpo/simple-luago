@@ -52,13 +52,15 @@ func luascript_Reference(s *lua.LuaVM) {
 
 	var ok bool
 	var ref lua.Lua_Ref
-	if ref, ok = s.Ref("g_data.name.type"); ok {
+	if ref, ok = s.Ref("g_data.name.type"); !ok {
 		fmt.Println("ERROR => must has reference")
 	}
 
 	//fmt.Println("luascript_VariableReference: REF -> ", REF)
 
-	s.RemoveVar("g_data.name.type")
+	if !s.RemoveVar("g_data.name.type") {
+		fmt.Println("ERROR => remove var failed")
+	}
 	if !s.HasRef(ref) {
 		fmt.Println("ERROR => must NOT has reference")
 	}

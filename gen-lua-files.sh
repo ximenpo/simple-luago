@@ -6,9 +6,10 @@ if [ "$LUA_SRC" == "" ]; then
 fi
 
 # clean
-rm -f lua/$.*.h     2> /dev/null
-rm -f lua/$.*.c     2> /dev/null
-rm -f lua/*.swig    2> /dev/null
+rm -f lua/$.*.h         2> /dev/null
+rm -f lua/$.*.c         2> /dev/null
+rm -f lua/*.swig        2> /dev/null
+rm -f lua/*.swig.*      2> /dev/null
 
 if [ ! -d "lua" ]; then
     mkdir lua
@@ -33,5 +34,7 @@ fi
     rm	lua/$.lua.c
     rm  lua/$.luac.c
     # swig
-    sed -e "s#\${LUA_SRC}#$LUA_SRC#g" lua/lua.swig.tpl >   lua/lua.swig
+    sed -e "s#\${LUA_SRC}#$LUA_SRC#g" gen-lua-swig.tpl >   lua/lua.swig
+    # swig.i
+    gcc -E -P -dD   "$CUR_DIR/gen-lua-swig.h" | grep -E '_MAX|_MIN|_BIT' > "$CUR_DIR/lua/lua.swig.i"
 )

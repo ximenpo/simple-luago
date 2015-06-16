@@ -38,6 +38,8 @@ type Lua_CFunction Lua_FuncPtr
 type Lua_Number C.lua_Number
 type Lua_Integer C.lua_Integer
 type Lua_Unsigned C.lua_Unsigned
+type Lua_CInt int32
+type Lua_CUint uint32
 
 //
 //	lua_? impls.
@@ -64,35 +66,35 @@ func Lua_isuserdata(L Lua_State, idx int) bool {
 }
 
 func Lua_isfunction(L Lua_State, n int) bool {
-	return X_Lua_isfunction(L, n) != 0
+	return X_Lua_isfunction(L, Lua_CInt(n)) != 0
 }
 
 func Lua_istable(L Lua_State, n int) bool {
-	return X_Lua_istable(L, n) != 0
+	return X_Lua_istable(L, Lua_CInt(n)) != 0
 }
 
 func Lua_islightuserdata(L Lua_State, n int) bool {
-	return X_Lua_islightuserdata(L, n) != 0
+	return X_Lua_islightuserdata(L, Lua_CInt(n)) != 0
 }
 
 func Lua_isnil(L Lua_State, n int) bool {
-	return X_Lua_isnil(L, n) != 0
+	return X_Lua_isnil(L, Lua_CInt(n)) != 0
 }
 
 func Lua_isboolean(L Lua_State, n int) bool {
-	return X_Lua_isboolean(L, n) != 0
+	return X_Lua_isboolean(L, Lua_CInt(n)) != 0
 }
 
 func Lua_isthread(L Lua_State, n int) bool {
-	return X_Lua_isthread(L, n) != 0
+	return X_Lua_isthread(L, Lua_CInt(n)) != 0
 }
 
 func Lua_isnone(L Lua_State, n int) bool {
-	return X_Lua_isnone(L, n) != 0
+	return X_Lua_isnone(L, Lua_CInt(n)) != 0
 }
 
 func Lua_isnoneornil(L Lua_State, n int) bool {
-	return X_Lua_isnoneornil(L, n) != 0
+	return X_Lua_isnoneornil(L, Lua_CInt(n)) != 0
 }
 
 func Lua_toboolean(L Lua_State, idx int) bool {

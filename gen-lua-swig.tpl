@@ -2,16 +2,6 @@
 // lua.swig
 //
 
-#define     LUA_USE_MACOSX
-#define     LUA_32BITS
-
-#define     LUA_COMPAT_APIINTCASTS
-
-%{
-#include    "lua_header.h"
-#include    "lua_macros.inc"
-%}
-
 struct      lua_State;
 struct      lua_Debug;
 struct      luaL_Buffer;
@@ -34,9 +24,19 @@ struct      luaL_Stream;
 %typemap(gotype)    (lua_Number)    "Lua_Number"
 %typemap(gotype)    (lua_Integer)   "Lua_Integer"
 %typemap(gotype)    (lua_Unsigned)  "Lua_Unsigned"
+%typemap(gotype)    (int)           "Lua_CInt"
+%typemap(gotype)    (unsigned int)  "Lua_CUint"
+%typemap(gotype)    (size_t)        "uint"
 
+%import     "lua.swig.i"
 %include    "${LUA_SRC}/luaconf.h"
 %include    "${LUA_SRC}/lua.h"
 %include    "${LUA_SRC}/lualib.h"
 %include    "${LUA_SRC}/lauxlib.h"
 %include    "lua_macros.inc"
+
+%{
+#define     LUA_COMPAT_APIINTCASTS
+#include    "lua_header.h"
+#include    "lua_macros.inc"
+%}
