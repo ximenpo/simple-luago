@@ -233,7 +233,7 @@ func LuaU_PushValue(L Lua_State, value *reflect.Value) bool {
 			Lua_pushinteger(L, Lua_Integer(value.Int()))
 		}
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		Lua_pushunsigned(L, Lua_Unsigned(value.Uint()))
+		Lua_pushinteger(L, Lua_Integer(value.Uint()))
 	case reflect.Float32, reflect.Float64:
 		Lua_pushnumber(L, Lua_Number(value.Float()))
 	case reflect.Bool:
@@ -317,7 +317,7 @@ func luaU_FetchInt(l Lua_State, v *reflect.Value) (ok bool) {
 
 func luaU_FetchUint(l Lua_State, v *reflect.Value) (ok bool) {
 	if ok = Lua_isnumber(l, -1); ok {
-		v.SetUint(uint64(Lua_tounsigned(l, -1)))
+		v.SetUint(uint64(Lua_tointegerx(l, -1, nil)))
 	}
 	Lua_pop(l, 1)
 	return

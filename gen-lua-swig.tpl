@@ -36,7 +36,6 @@ struct      luaL_Stream;
 %include    "lua_macros.inc"
 
 %{
-#define     LUA_COMPAT_APIINTCASTS
 #include    "lua_header.h"
 #include    "lua_macros.inc"
 %}

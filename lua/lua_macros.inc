@@ -109,18 +109,6 @@ static  void Lua_replace(lua_State *L, int idx) {
     lua_replace(L, idx);
 }
 
-static  void Lua_pushunsigned(lua_State *L, lua_Unsigned n) {
-    lua_pushunsigned(L,n);
-}
-
-static  lua_Unsigned Lua_tounsignedx(lua_State *L, int idx, int *isnum) {
-    return  (lua_Unsigned)(lua_tounsignedx(L, idx, isnum));
-}
-
-static  lua_Unsigned Lua_tounsigned(lua_State *L, int idx) {
-    return  (lua_Unsigned)(lua_tounsigned(L, idx));
-}
-
 //
 // lauxlib.h    lua_?
 //
