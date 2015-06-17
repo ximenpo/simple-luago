@@ -5,7 +5,7 @@ package lua
 #cgo darwin LDFLAGS: -lreadline
 
 #cgo linux  CFLAGS: -DLUA_USE_LINUX
-#cgo linux  LDFLAGS: -Wl,-E -ldl -lreadline
+#cgo linux  LDFLAGS: -Wl,-E -ldl -lm -lreadline
 
 #include	<stdlib.h>
 #include    "lua_header.h"
