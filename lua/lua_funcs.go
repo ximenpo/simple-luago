@@ -34,12 +34,19 @@ import (
 //
 type Lua_Ref int
 type Lua_FuncPtr *_swig_fnptr
+type Lua_CInt int32
+type Lua_CUint uint32
+
 type Lua_CFunction Lua_FuncPtr
 type Lua_Number C.lua_Number
 type Lua_Integer C.lua_Integer
 type Lua_Unsigned C.lua_Unsigned
-type Lua_CInt int32
-type Lua_CUint uint32
+
+type Lua_NilState uintptr
+
+func (e Lua_NilState) Swigcptr() uintptr {
+	return 0
+}
 
 //
 //	lua_? impls.
@@ -158,6 +165,10 @@ func LuaL_newlib(L Lua_State, l unsafe.Pointer) {
 //
 func LuaF_State(L unsafe.Pointer) Lua_State {
 	return SwigcptrLua_State(L)
+}
+
+func LuaF_NilState() Lua_State {
+	return Lua_NilState(uintptr(0))
 }
 
 func LuaF_StateCPtr(L Lua_State) *C.lua_State {
