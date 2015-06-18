@@ -7,6 +7,8 @@
     EXIT    /B  1
 )
 
+@SET LUA_SRC=%LUA_SRC:\=/%
+
 :: clean
 @IF EXIST lua\$.*.h		DEL /Q /F lua\$.*.h		2> nul
 @IF EXIST lua\$.*.c		DEL /Q /F lua\$.*.c		2> nul
