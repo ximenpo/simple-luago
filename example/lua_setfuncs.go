@@ -24,7 +24,7 @@ import "C"
 
 //export myGoCFunc
 func myGoCFunc(L unsafe.Pointer) int32 {
-	l := LuaF_State(L)
+	l := Lua_State(L)
 	Println("Hello, " + LuaL_checkstring(l, 1) + "! call from GO->myGoCFunc")
 	return 0
 }

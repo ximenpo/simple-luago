@@ -32,44 +32,43 @@ import (
 //
 //	extra types.
 //
-type Lua_Ref int
-type Lua_FuncPtr *_swig_fnptr
+
 type Lua_CInt int32
 type Lua_CUint uint32
+type Lua_CFile uintptr
+type Lua_CStatePtr *C.lua_State
 
+type Lua_Ref int
+type Lua_FuncPtr *_swig_fnptr
+
+type Lua_State unsafe.Pointer
 type Lua_CFunction Lua_FuncPtr
+
+type Lua_KContext uintptr
+type Lua_KFunction Lua_FuncPtr
+
 type Lua_Number C.lua_Number
 type Lua_Integer C.lua_Integer
 type Lua_Unsigned C.lua_Unsigned
 
-type Lua_NilState uintptr
-
-func (e Lua_NilState) Swigcptr() uintptr {
-	return 0
-}
-
-//
-//	lua_? impls.
-//
-
 func Lua_isnumber(L Lua_State, idx int) bool {
-	return C.lua_isnumber(LuaF_StateCPtr(L), C.int(idx)) != 0
+	return C.lua_isnumber(Lua_CStatePtr(L), C.int(idx)) != 0
 }
 
 func Lua_isstring(L Lua_State, idx int) bool {
-	return C.lua_isstring(LuaF_StateCPtr(L), C.int(idx)) != 0
+	return C.lua_isstring(Lua_CStatePtr(L), C.int(idx)) != 0
 }
 
 func Lua_iscfunction(L Lua_State, idx int) bool {
-	return C.lua_iscfunction(LuaF_StateCPtr(L), C.int(idx)) != 0
+	return C.lua_iscfunction(Lua_CStatePtr(L), C.int(idx)) != 0
 }
 
 func Lua_isinteger(L Lua_State, idx int) bool {
-	return C.lua_isinteger(LuaF_StateCPtr(L), C.int(idx)) != 0
+	return C.lua_isinteger(Lua_CStatePtr(L), C.int(idx)) != 0
 }
 
 func Lua_isuserdata(L Lua_State, idx int) bool {
-	return C.lua_isuserdata(LuaF_StateCPtr(L), C.int(idx)) != 0
+	return C.lua_isuserdata(Lua_CStatePtr(L), C.int(idx)) != 0
 }
 
 func Lua_isfunction(L Lua_State, n int) bool {
@@ -105,7 +104,7 @@ func Lua_isnoneornil(L Lua_State, n int) bool {
 }
 
 func Lua_toboolean(L Lua_State, idx int) bool {
-	return C.lua_toboolean(LuaF_StateCPtr(L), C.int(idx)) != 0
+	return C.lua_toboolean(Lua_CStatePtr(L), C.int(idx)) != 0
 }
 
 func Lua_pushboolean(L Lua_State, b bool) {
@@ -113,7 +112,7 @@ func Lua_pushboolean(L Lua_State, b bool) {
 	if b {
 		v = 1
 	}
-	C.lua_pushboolean(LuaF_StateCPtr(L), v)
+	C.lua_pushboolean(Lua_CStatePtr(L), v)
 }
 
 //
@@ -131,7 +130,7 @@ func LuaL_checkoption(L Lua_State, arg int, def string, lst []string) int {
 	s := C.CString(def)
 	defer C.free(unsafe.Pointer(s))
 
-	R := C.luaL_checkoption(LuaF_StateCPtr(L), C.int(arg), s, &l[0])
+	R := C.luaL_checkoption(Lua_CStatePtr(L), C.int(arg), s, &l[0])
 	return int(R)
 }
 
@@ -142,16 +141,16 @@ func LuaL_loadbufferx(L Lua_State, buff unsafe.Pointer, sz uint, name string, mo
 	m := C.CString(mode)
 	defer C.free(unsafe.Pointer(m))
 
-	r := C.luaL_loadbufferx(LuaF_StateCPtr(L), (*C.char)(buff), C.size_t(sz), n, m)
+	r := C.luaL_loadbufferx(Lua_CStatePtr(L), (*C.char)(buff), C.size_t(sz), n, m)
 	return int(r)
 }
 
 func LuaL_setfuncs(L Lua_State, l unsafe.Pointer, nup int) {
-	C.luaL_setfuncs(LuaF_StateCPtr(L), (*C.luaL_Reg)(l), C.int(nup))
+	C.luaL_setfuncs(Lua_CStatePtr(L), (*C.luaL_Reg)(l), C.int(nup))
 }
 
 func LuaL_newlibtable(L Lua_State, l unsafe.Pointer) {
-	C.lua_createtable(LuaF_StateCPtr(L), 0, LuaF_RegLen(l))
+	C.lua_createtable(Lua_CStatePtr(L), 0, LuaF_RegLen(l))
 }
 
 func LuaL_newlib(L Lua_State, l unsafe.Pointer) {
@@ -163,17 +162,6 @@ func LuaL_newlib(L Lua_State, l unsafe.Pointer) {
 //
 // lua function params' utils.
 //
-func LuaF_State(L unsafe.Pointer) Lua_State {
-	return SwigcptrLua_State(L)
-}
-
-func LuaF_NilState() Lua_State {
-	return Lua_NilState(uintptr(0))
-}
-
-func LuaF_StateCPtr(L Lua_State) *C.lua_State {
-	return (*C.lua_State)(unsafe.Pointer(L.Swigcptr()))
-}
 
 func LuaF_RegLen(p unsafe.Pointer) C.int {
 	return C.X_LuaF_RegLen(p)
@@ -198,6 +186,15 @@ func LuaF_Alloc(fp unsafe.Pointer) Lua_FuncPtr {
 //extern    int	    myGoCFunc(void* l);
 //tfunc             myGoCFunc(L unsafe.Pointer) int32
 func LuaF_CFunction(fp unsafe.Pointer) Lua_FuncPtr {
+	return Lua_FuncPtr(fp)
+}
+
+//
+// convert unsafe.Pointer to Lua_CFunction
+//
+//extern    int	    myGoCFunc(void* l);
+//tfunc             myGoCFunc(L unsafe.Pointer) int32
+func LuaF_KFunction(fp unsafe.Pointer) Lua_FuncPtr {
 	return Lua_FuncPtr(fp)
 }
 

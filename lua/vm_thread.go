@@ -3,9 +3,11 @@ package lua
 /*
 
 #include	"lua_header.h"
+//struct lua_State;
+//int     Lua_yield(struct lua_State *L, int nresults);
 
-extern  int	script_WaitFrames(void* l);
-extern  int	script_WaitSeconds(void* l);
+int	script_WaitFrames(void* l);
+int	script_WaitSeconds(void* l);
 
 static	int	script_yield_WaitFrames(void* l){
 	return	lua_yield(l, script_WaitFrames(l));
@@ -197,7 +199,7 @@ func (t *LuaThread) resume(bAbortWait bool) bool {
 	// param is treated as a return value from the function that yielded
 	Lua_pushboolean(t.handle, bAbortWait)
 
-	switch Lua_resume(t.handle, Lua_NilState(0), 1) {
+	switch Lua_resume(t.handle, nil, 1) {
 	case LUA_OK:
 		{
 			t.status = THREAD_DONE
@@ -298,7 +300,7 @@ func script_GetScriptObject(L Lua_State) *LuaThread {
 
 //export script_WaitFrames
 func script_WaitFrames(L unsafe.Pointer) Lua_CInt {
-	l := LuaF_State(L)
+	l := Lua_State(L)
 	s := script_GetScriptObject(l)
 
 	s.frames_wakeup = int(LuaL_optinteger(l, 1, 1))
@@ -309,7 +311,7 @@ func script_WaitFrames(L unsafe.Pointer) Lua_CInt {
 
 //export script_WaitSeconds
 func script_WaitSeconds(L unsafe.Pointer) Lua_CInt {
-	l := LuaF_State(L)
+	l := Lua_State(L)
 	s := script_GetScriptObject(l)
 
 	s.timestamp_wakeup = s.timestamp + float64(LuaL_optnumber(l, 1, 1.0))

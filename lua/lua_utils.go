@@ -15,14 +15,14 @@ import (
 // utils.
 
 func LuaU_GetRef(L Lua_State, refid Lua_Ref) bool {
-	return C.luaU_GetRef(LuaF_StateCPtr(L), C.int(refid)) != 0
+	return C.luaU_GetRef(Lua_CStatePtr(L), C.int(refid)) != 0
 }
 
 func LuaU_GetGlobal(L Lua_State, varname string) bool {
 	s := C.CString(varname)
 	defer C.free(unsafe.Pointer(s))
 
-	r := C.luaU_GetGlobal(LuaF_StateCPtr(L), s)
+	r := C.luaU_GetGlobal(Lua_CStatePtr(L), s)
 	return (0 != r)
 }
 
@@ -30,7 +30,7 @@ func LuaU_SetGlobal(L Lua_State, varname string) bool {
 	s := C.CString(varname)
 	defer C.free(unsafe.Pointer(s))
 
-	r := C.luaU_SetGlobal(LuaF_StateCPtr(L), s)
+	r := C.luaU_SetGlobal(Lua_CStatePtr(L), s)
 	return (0 != r)
 }
 
@@ -349,7 +349,7 @@ func luaU_FetchString(l Lua_State, v *reflect.Value) (ok bool) {
 
 func luaU_FetchPointer(l Lua_State, v *reflect.Value) (ok bool) {
 	if ok = Lua_isthread(l, -1); ok {
-		v.SetPointer(unsafe.Pointer(Lua_tothread(l, -1).Swigcptr()))
+		v.SetPointer(unsafe.Pointer(Lua_tothread(l, -1)))
 	}
 	Lua_pop(l, 1)
 	return
