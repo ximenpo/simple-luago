@@ -19,7 +19,7 @@
 
 :: gen files
 @SET	CUR_DIR=%CD%
-@CD		"%LUA_SRC%"
+@CD		"%LUA_SRC:/=\%"
 
 :: h
 @SET	HEADERS=luaconf.h lua.h lualib.h lauxlib.h lua.hpp
