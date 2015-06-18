@@ -1,3 +1,3 @@
 package simple_luago
 
-//go:generate	cmd  gen-lua-files.cmd
+//go:generate	cmd.exe /C  "gen-lua-files.cmd"

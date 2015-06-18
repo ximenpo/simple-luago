@@ -33,8 +33,8 @@ fi
     cd  $CUR_DIR
     rm	lua/$.lua.c
     rm  lua/$.luac.c
-    # swig
-    sed -e "s#\${LUA_SRC}#$LUA_SRC#g" gen-lua-swig.tpl >   lua/lua.swig
     # swig.i
     gcc -E -P -dD   "$CUR_DIR/gen-lua-swig.h" | grep -E '_MAX|_MIN|_BIT' > "$CUR_DIR/lua/lua.swig.i"
+    # swig
+    sed -e "s#\${LUA_SRC}#$LUA_SRC#g" gen-lua-swig.tpl >   lua/lua.swig
 )
