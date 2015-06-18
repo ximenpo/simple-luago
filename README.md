@@ -1,12 +1,12 @@
 # simple-luago
 
-simple-luago is a simple wrapper for lua(5.3.0+) in go(1.4+) using swig(3.0.5+) and cgo. 
+simple-luago is a simple wrapper for lua(5.3.0+) in go(1.4+) using swig(3.0.5+) and cgo.
 
 ### supported platforms
 
 * macosx
 * linux(centos)
-* windows(TODO)
+* windows(mingw)
 
 ### install
 
