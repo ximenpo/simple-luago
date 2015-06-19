@@ -6,7 +6,7 @@ simple-luago is a simple wrapper for lua(5.3.0+) in go(1.4+) using swig(3.0.5+) 
 
 * macosx
 * linux(centos)
-* windows(mingw)
+* windows(need go1.5)
 
 ### install
 

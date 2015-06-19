@@ -2,7 +2,7 @@
 @setlocal enabledelayedexpansion
 
 @IF "%LUA_SRC%" == "" @(
-    ECHO	please define LUA_SRC first, unix seperator, no quotes.
+    ECHO	please define LUA_SRC first, no quotes.
 	ECHO	eg. SET LUA_SRC=E:\path\to\lua\src
     EXIT    /B  1
 )
