@@ -51,7 +51,7 @@ simple-luago项目专注于lua在go语言中的应用，使用swig和cgo将lua�
 
 * macosx
 * linux(centos)
-* windows(TODO)
+* windows(need go1.5)
 
 ### 安装
 
