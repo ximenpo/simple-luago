@@ -12,8 +12,8 @@ simple-luago is a simple wrapper for lua(5.3.0+) in go(1.4+) using swig(3.0.5+) 
 
 #### prepare
 
-- go1.4.0+
-- swig3.0.5+
+- go1.4.0+ & swig3.0.5
+- go1.5.0+ & swig3.0.6+
 - git
 - gcc
 - lua5.3.0+
@@ -57,8 +57,8 @@ simple-luago项目专注于lua在go语言中的应用，使用swig和cgo将lua�
 
 #### 准备
 
-- go1.4.0+
-- swig3.0.5+
+- go1.4.0+ & swig3.0.5
+- go1.5.0+ & swig3.0.6+
 - git
 - gcc
 - lua5.3.0+
