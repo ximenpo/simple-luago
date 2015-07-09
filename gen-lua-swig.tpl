@@ -62,9 +62,11 @@ struct      luaL_Stream;
 //
 // go wrapper code
 //
+#if     SWIG_VERSION < 0x030006
 %insert(go_begin) %{
 /*
 #include "lua_header.h"
 */
 import "C"
 %}
+#endif
