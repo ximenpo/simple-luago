@@ -2,11 +2,14 @@
 // lua.swig
 //
 
-//struct      lua_State;
 struct      lua_Debug;
 struct      luaL_Buffer;
 struct      luaL_Stream;
 
+//
+//  impls manully
+//
+%ignore     lua_ident;
 %ignore     lua_pushvfstring;
 %ignore     lua_pushfstring;
 %ignore     lua_isnumber;
@@ -21,6 +24,11 @@ struct      luaL_Stream;
 %ignore     luaL_setfuncs;
 %ignore     luaL_loadbufferx;
 
+%rename(fun)    func;
+
+//
+//  types
+//
 %typemap(gotype)    (lua_State*)    "Lua_State"
 %typemap(gotype)    (lua_Number)    "Lua_Number"
 %typemap(gotype)    (lua_Integer)   "Lua_Integer"
@@ -33,6 +41,9 @@ struct      luaL_Stream;
 %typemap(gotype)    (void*)         "uintptr"
 %typemap(gotype)    (CallInfo*)     "uintptr"
 
+//
+// interfaces
+//
 %import     "lua.swig.i"
 %include    "${LUA_SRC}/luaconf.h"
 %include    "${LUA_SRC}/lua.h"
@@ -40,7 +51,20 @@ struct      luaL_Stream;
 %include    "${LUA_SRC}/lauxlib.h"
 %include    "lua_macros.inc"
 
-%{
+//
+// c wrapper code
+//
+%insert(header) %{
 #include    "lua_header.h"
 #include    "lua_macros.inc"
+%}
+
+//
+// go wrapper code
+//
+%insert(go_begin) %{
+/*
+#include "lua_header.h"
+*/
+import "C"
 %}

@@ -22,6 +22,10 @@ static	int	X_LuaF_RegLen(void* p){
 	return	len;
 }
 
+static	const char*	X_LuaF_Ident(){
+	return	lua_ident;
+}
+
 */
 import "C"
 
@@ -50,6 +54,8 @@ type Lua_KFunction Lua_FuncPtr
 type Lua_Number C.lua_Number
 type Lua_Integer C.lua_Integer
 type Lua_Unsigned C.lua_Unsigned
+
+var Lua_ident string = C.GoString(C.X_LuaF_Ident())
 
 func Lua_isnumber(L Lua_State, idx int) bool {
 	return C.lua_isnumber(Lua_CStatePtr(L), C.int(idx)) != 0
