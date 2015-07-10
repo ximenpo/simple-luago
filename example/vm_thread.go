@@ -41,8 +41,8 @@ func luascript_Demo(m *lua.LuaThreadMgr) {
 		fmt.Println("#thread sum: ", m.GetThreadSum(), "!=", 1)
 	}
 
-	if !s.RunString("print('hello, world')") {
-		fmt.Println(s.Error())
+	if err := s.RunString("print('hello, world')"); err != nil {
+		fmt.Println(err)
 	}
 	if 0 != lua.Lua_gettop(s.GetHandle()) {
 		fmt.Println("STACK: ", lua.Lua_gettop(s.GetHandle()))

@@ -16,17 +16,8 @@ func callfunction(f func(s *lua.LuaVM)) {
 	s.Stop()
 }
 
-func luascript_PrintEmptyErrorMessage(s *lua.LuaVM) {
-	msg := s.Error()
-	if 0 != len(msg) {
-		fmt.Println("ERROR -> must not has error message", msg)
-	}
-}
-
 func luascript_PrintErrorMessage(s *lua.LuaVM) {
-	s.RunString("dads;jfaslkdfjaslkfj")
-	msg := s.Error()
-	if 0 == len(msg) {
+	if err := s.RunString("dads;jfaslkdfjaslkfj"); err == nil {
 		fmt.Println("ERROR -> must has error message")
 	}
 }
@@ -36,7 +27,7 @@ func luascript_HasVariable(s *lua.LuaVM) {
 		fmt.Println("ERROR => must has not variable")
 	}
 
-	lua.LuaL_dostring(s.GetHandle(), "g_data = {}; g_data.name={}; g_data.name.type = 'simple';")
+	s.RunString("g_data = {}; g_data.name={}; g_data.name.type = 'simple';")
 	if !s.HasVar("g_data.name.type") {
 		fmt.Println("ERROR => must has variable")
 	}
@@ -48,7 +39,7 @@ func luascript_HasVariable(s *lua.LuaVM) {
 }
 
 func luascript_Reference(s *lua.LuaVM) {
-	lua.LuaL_dostring(s.GetHandle(), "g_data = {}; g_data.name={}; g_data.name.type = 'simple';")
+	s.RunString("g_data = {}; g_data.name={}; g_data.name.type = 'simple';")
 
 	var ok bool
 	var ref lua.Lua_Ref
@@ -67,7 +58,7 @@ func luascript_Reference(s *lua.LuaVM) {
 }
 
 func luascript_Variable(s *lua.LuaVM) {
-	lua.LuaL_dostring(s.GetHandle(), "g_data = {}; g_data.name={}; g_data.name.type = 'simple';")
+	s.RunString("g_data = {}; g_data.name={}; g_data.name.type = 'simple';")
 
 	var n int = 100
 	var u uint = 200
@@ -115,17 +106,15 @@ func luascript_Variable(s *lua.LuaVM) {
 }
 
 func luascript_CallFunction(s *lua.LuaVM) {
-	lua.LuaL_dostring(s.GetHandle(), "g_data = {}; g_data.f = function(name) g_data.name = name; end;")
-	msg := s.Error()
-	if 0 != len(msg) {
-		fmt.Println("ERROR -> must not has error message", msg)
+	if err := s.RunString("g_data = {}; g_data.f = function(name) g_data.name = name; end;"); err != nil {
+		fmt.Println("ERROR -> must not has error message", err)
 	}
 
 	if !s.HasVar("g_data.f") {
 		fmt.Println("ERROR => must has variable")
 	}
 
-	if !s.Call("g_data.f", "simple") {
+	if err := s.Call("g_data.f", "simple"); err != nil {
 		fmt.Println("ERROR: call function error")
 	}
 
@@ -140,10 +129,8 @@ func luascript_CallFunction(s *lua.LuaVM) {
 }
 
 func luascript_InvokeFunction(s *lua.LuaVM) {
-	lua.LuaL_dostring(s.GetHandle(), "g_data = {}; g_data.f = function(name) return 'Hello, '..name; end;")
-	msg := s.Error()
-	if 0 != len(msg) {
-		fmt.Println("ERROR -> must not has error message", msg)
+	if err := s.RunString("g_data = {}; g_data.f = function(name) return 'Hello, '..name; end;"); err != nil {
+		fmt.Println("ERROR -> must not has error message", err)
 	}
 
 	if !s.HasVar("g_data.f") {
@@ -151,20 +138,19 @@ func luascript_InvokeFunction(s *lua.LuaVM) {
 	}
 
 	var str string
-	if !s.Invoke(&str, "g_data.f", "simple") {
+	if err := s.Invoke(&str, "g_data.f", "simple"); err != nil {
 		fmt.Println("ERROR: invoke function error")
 	}
 	if "Hello, simple" != str {
 		fmt.Println("ERROR: invoke function -> wrong string value => ", str)
 	}
 
-	if !s.Invoke(nil, "g_data.f", "simple") {
+	if err := s.Invoke(nil, "g_data.f", "simple"); err != nil {
 		fmt.Println("ERROR: nil invoke function error")
 	}
 }
 
 func main() {
-	callfunction(luascript_PrintEmptyErrorMessage)
 	callfunction(luascript_PrintErrorMessage)
 	callfunction(luascript_HasVariable)
 	callfunction(luascript_Reference)

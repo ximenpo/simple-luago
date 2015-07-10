@@ -1,6 +1,8 @@
 package lua
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 	"unsafe"
 )
@@ -9,8 +11,7 @@ import (
 //	LuaScript
 //
 type LuaScript struct {
-	handle  Lua_State
-	err_msg string
+	handle Lua_State
 }
 
 func (s *LuaScript) GetHandle() Lua_State {
@@ -19,11 +20,6 @@ func (s *LuaScript) GetHandle() Lua_State {
 
 func (s *LuaScript) SetHandle(l Lua_State) {
 	s.handle = l
-}
-
-// called must after dostring / dofile
-func (s *LuaScript) Error() string {
-	return s.err_msg
 }
 
 func (s *LuaScript) OpenStdLibs() {
@@ -128,30 +124,35 @@ func (s *LuaScript) SetObject(var_name string, value interface{}, keep_nonexiste
 	return true
 }
 
-func (s *LuaScript) Call(func_name string, args ...interface{}) bool {
+func (s *LuaScript) Call(func_name string, args ...interface{}) error {
 	if !LuaU_GetGlobal(s.handle, func_name) {
-		return false
+		return errors.New("can't find function " + func_name)
 	}
 
 	for i := 0; i < len(args); i++ {
 		if !LuaU_PushVar(s.handle, args[i]) {
 			Lua_pop(s.handle, Lua_CInt(i+1)) // 0, 1, .. i - 1, + LuaU_GetGlobal
-			return false
+			return errors.New(fmt.Sprintf("push param [%d] failed", i))
 		}
 	}
 
-	return LuaU_InvokeFunc(s.handle, len(args), 0, nil, &s.err_msg)
+	var err_msg string
+	if !LuaU_InvokeFunc(s.handle, len(args), 0, nil, &err_msg) {
+		return errors.New(err_msg)
+	}
+
+	return nil
 }
 
-func (s *LuaScript) Invoke(ret_value interface{}, func_name string, args ...interface{}) bool {
+func (s *LuaScript) Invoke(ret_value interface{}, func_name string, args ...interface{}) error {
 	if !LuaU_GetGlobal(s.handle, func_name) {
-		return false
+		return errors.New("can't find function " + func_name)
 	}
 
 	for i := 0; i < len(args); i++ {
 		if !LuaU_PushVar(s.handle, args[i]) {
 			Lua_pop(s.handle, Lua_CInt(i+1)) // 0, 1, .. i - 1, + LuaU_GetGlobal
-			return false
+			return errors.New(fmt.Sprintf("push param [%d] failed", i))
 		}
 	}
 
@@ -160,42 +161,60 @@ func (s *LuaScript) Invoke(ret_value interface{}, func_name string, args ...inte
 		retsum = 1
 	}
 
-	if !LuaU_InvokeFunc(s.handle, len(args), retsum, nil, &s.err_msg) {
-		return false
+	var err_msg string
+	if !LuaU_InvokeFunc(s.handle, len(args), retsum, nil, &err_msg) {
+		return errors.New(err_msg)
 	}
 
-	if nil != ret_value {
-		return LuaU_FetchVar(s.handle, ret_value, true)
+	if (nil != ret_value) && !LuaU_FetchVar(s.handle, ret_value, true) {
+		return errors.New("fetch function result failed")
 	}
 
-	return true
+	return nil
 }
 
-func (s *LuaScript) RunFile(file string) bool {
+func (s *LuaScript) RunFile(file string) error {
+	var err_msg string
 	if R := LuaL_loadfile(s.handle, file); LUA_OK != R {
-		s.err_msg = Lua_tostring(s.handle, -1)
+		err_msg = Lua_tostring(s.handle, -1)
 		Lua_pop(s.handle, 1)
-		return false
+		return errors.New(err_msg)
 	}
-	return LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET), nil, &s.err_msg)
+
+	if !LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET), nil, &err_msg) {
+		return errors.New(err_msg)
+	}
+
+	return nil
 }
 
-func (s *LuaScript) RunString(code string) bool {
+func (s *LuaScript) RunString(code string) error {
+	var err_msg string
 	if R := LuaL_loadstring(s.handle, code); LUA_OK != R {
-		s.err_msg = Lua_tostring(s.handle, -1)
+		err_msg = Lua_tostring(s.handle, -1)
 		Lua_pop(s.handle, 1)
-		return false
+		return errors.New(err_msg)
 	}
-	return LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET), nil, &s.err_msg)
+
+	if !LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET), nil, &err_msg) {
+		return errors.New(err_msg)
+	}
+
+	return nil
 }
 
-func (s *LuaScript) RunBuffer(buffer unsafe.Pointer, size uint) bool {
+func (s *LuaScript) RunBuffer(buffer unsafe.Pointer, size uint) error {
+	var err_msg string
 	if LUA_OK == LuaL_loadbuffer(s.handle, uintptr(buffer), size, "LuaScript.RunBuffer") {
-		return LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET), nil, &s.err_msg)
+		if !LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET), nil, &err_msg) {
+			return errors.New(err_msg)
+		}
+		return nil
 	}
-	s.err_msg = Lua_tostring(s.handle, -1)
+
+	err_msg = Lua_tostring(s.handle, -1)
 	Lua_pop(s.handle, 1)
-	return false
+	return errors.New(err_msg)
 }
 
 //

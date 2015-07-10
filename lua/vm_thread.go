@@ -161,35 +161,37 @@ type LuaThread struct {
 	frames_wakeup    int     // number of frames to wait
 }
 
-func (t *LuaThread) update(dt float64) {
+func (t *LuaThread) update(dt float64) (err error) {
 	t.timestamp += float64(dt)
 
 	switch t.status {
 	case THREAD_WAIT_SECONDS:
 		{ // 脚本等待多少秒
 			if t.timestamp >= t.timestamp_wakeup {
-				t.resume(false)
+				err = t.resume(false)
 			}
 		}
 	case THREAD_WAIT_FRAMES:
 		{ // 脚本等待多少帧
 			t.frames_wakeup--
 			if t.frames_wakeup <= 0 {
-				t.resume(false)
+				err = t.resume(false)
 			}
 		}
 	}
+
+	return
 }
 
-func (t *LuaThread) resume(bAbortWait bool) bool {
+func (t *LuaThread) resume(bAbortWait bool) error {
 	switch t.status {
 	case THREAD_NOT_LOADED:
 		{
-			return false
+			return errors.New("thread not loaded")
 		}
 	case THREAD_ERROR:
 		{
-			return false
+			return errors.New("thread was error")
 		}
 	}
 
@@ -199,26 +201,27 @@ func (t *LuaThread) resume(bAbortWait bool) bool {
 	// param is treated as a return value from the function that yielded
 	Lua_pushboolean(t.handle, bAbortWait)
 
+	var err_msg string
 	switch Lua_resume(t.handle, nil, 1) {
 	case LUA_OK:
 		{
 			t.status = THREAD_DONE
-			return true
+			return nil
 		}
 	case LUA_YIELD:
 		{
-			return true
+			return nil
 		}
 		break
 	default:
 		{
 			t.status = THREAD_ERROR
-			t.err_msg = Lua_tostring(t.handle, -1)
+			err_msg = Lua_tostring(t.handle, -1)
 			Lua_pop(t.handle, -1)
 		}
 	}
 
-	return false
+	return errors.New(err_msg)
 }
 
 func (t *LuaThread) GetMgr() *LuaThreadMgr {
@@ -237,7 +240,7 @@ func (t *LuaThread) SetAutoDelete(bAutoDelete bool) {
 	t.auto_delete = bAutoDelete
 }
 
-func (t *LuaThread) RunFile(file string) bool {
+func (t *LuaThread) RunFile(file string) error {
 	t.status = THREAD_NOT_LOADED
 
 	if LUA_OK == LuaL_loadfile(t.handle, file) {
@@ -246,19 +249,19 @@ func (t *LuaThread) RunFile(file string) bool {
 	}
 
 	t.status = THREAD_NOT_LOADED
-	t.err_msg = Lua_tostring(t.handle, -1)
+	err_msg := Lua_tostring(t.handle, -1)
 	Lua_pop(t.handle, 1)
 
-	return false
+	return errors.New(err_msg)
 }
 
-func (t *LuaThread) RunString(code string) bool {
+func (t *LuaThread) RunString(code string) error {
 	t.status = THREAD_NOT_LOADED
 
 	if LUA_OK != LuaL_loadstring(t.handle, code) {
-		t.err_msg = Lua_tostring(t.handle, -1)
+		err_msg := Lua_tostring(t.handle, -1)
 		Lua_pop(t.handle, 1)
-		return false
+		return errors.New(err_msg)
 	}
 
 	t.status = THREAD_LOADED
@@ -266,13 +269,13 @@ func (t *LuaThread) RunString(code string) bool {
 	return t.resume(false)
 }
 
-func (t *LuaThread) RunBuffer(buffer unsafe.Pointer, size uint) bool {
+func (t *LuaThread) RunBuffer(buffer unsafe.Pointer, size uint) error {
 	t.status = THREAD_NOT_LOADED
 
 	if LUA_OK != LuaL_loadbuffer(t.handle, uintptr(buffer), size, "LuaThread.RunBuffer") {
-		t.err_msg = Lua_tostring(t.handle, -1)
+		err_msg := Lua_tostring(t.handle, -1)
 		Lua_pop(t.handle, 1)
-		return false
+		return errors.New(err_msg)
 	}
 
 	t.status = THREAD_LOADED
