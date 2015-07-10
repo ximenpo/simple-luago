@@ -37,7 +37,7 @@
 
 :: swig.i
 ::@gcc -E -P -dD   "%CUR_DIR%/gen-lua-swig.h" | findstr "_MAX _MIN _BIT" > "%CUR_DIR%/lua/lua.swig.i"
-@TYPE   "%CUR_DIR%/gen-lua-swig.h"  >   "%CUR_DIR%/lua/lua.swig.i"
+@TYPE   "%CUR_DIR%\gen-lua-swig.h"  >   "%CUR_DIR%\lua\lua.swig.i"
 
 :: swig
 @for /F "delims=" %%i in (gen-lua-swig.tpl) do @(
