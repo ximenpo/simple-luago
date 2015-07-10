@@ -2,9 +2,18 @@
 // lua.swig
 //
 
+#pragma SWIG nowarn=451
+
+//
+//  lua structs
+//
 struct      lua_Debug;
 struct      luaL_Buffer;
 struct      luaL_Stream;
+
+%nodefaultdtor  lua_Debug;
+%nodefaultdtor  luaL_Buffer;
+%nodefaultdtor  luaL_Stream;
 
 //
 //  impls manully
