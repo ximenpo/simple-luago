@@ -124,7 +124,7 @@ func (s *LuaScript) SetObject(var_name string, value interface{}, keep_nonexiste
 	return true
 }
 
-func (s *LuaScript) Call(func_name string, args ...interface{}) error {
+func (s *LuaScript) Call(func_name string, args ...interface{}) (err error) {
 	if !LuaU_GetGlobal(s.handle, func_name) {
 		return errors.New("can't find function " + func_name)
 	}
@@ -136,15 +136,11 @@ func (s *LuaScript) Call(func_name string, args ...interface{}) error {
 		}
 	}
 
-	var err_msg string
-	if !LuaU_InvokeFunc(s.handle, len(args), 0, nil, &err_msg) {
-		return errors.New(err_msg)
-	}
-
-	return nil
+	_, err = LuaU_InvokeFunc(s.handle, len(args), 0)
+	return
 }
 
-func (s *LuaScript) Invoke(ret_value interface{}, func_name string, args ...interface{}) error {
+func (s *LuaScript) Invoke(ret_value interface{}, func_name string, args ...interface{}) (err error) {
 	if !LuaU_GetGlobal(s.handle, func_name) {
 		return errors.New("can't find function " + func_name)
 	}
@@ -161,9 +157,8 @@ func (s *LuaScript) Invoke(ret_value interface{}, func_name string, args ...inte
 		retsum = 1
 	}
 
-	var err_msg string
-	if !LuaU_InvokeFunc(s.handle, len(args), retsum, nil, &err_msg) {
-		return errors.New(err_msg)
+	if _, err = LuaU_InvokeFunc(s.handle, len(args), retsum); err != nil {
+		return
 	}
 
 	if (nil != ret_value) && !LuaU_FetchVar(s.handle, ret_value, true) {
@@ -173,48 +168,37 @@ func (s *LuaScript) Invoke(ret_value interface{}, func_name string, args ...inte
 	return nil
 }
 
-func (s *LuaScript) RunFile(file string) error {
-	var err_msg string
+func (s *LuaScript) RunFile(file string) (err error) {
 	if R := LuaL_loadfile(s.handle, file); LUA_OK != R {
-		err_msg = Lua_tostring(s.handle, -1)
+		err = errors.New(Lua_tostring(s.handle, -1))
 		Lua_pop(s.handle, 1)
-		return errors.New(err_msg)
+		return
 	}
 
-	if !LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET), nil, &err_msg) {
-		return errors.New(err_msg)
-	}
-
-	return nil
+	_, err = LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET))
+	return
 }
 
-func (s *LuaScript) RunString(code string) error {
-	var err_msg string
+func (s *LuaScript) RunString(code string) (err error) {
 	if R := LuaL_loadstring(s.handle, code); LUA_OK != R {
-		err_msg = Lua_tostring(s.handle, -1)
+		err = errors.New(Lua_tostring(s.handle, -1))
 		Lua_pop(s.handle, 1)
-		return errors.New(err_msg)
+		return
 	}
 
-	if !LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET), nil, &err_msg) {
-		return errors.New(err_msg)
-	}
-
-	return nil
+	_, err = LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET))
+	return
 }
 
-func (s *LuaScript) RunBuffer(buffer unsafe.Pointer, size uint) error {
-	var err_msg string
+func (s *LuaScript) RunBuffer(buffer unsafe.Pointer, size uint) (err error) {
 	if LUA_OK == LuaL_loadbuffer(s.handle, uintptr(buffer), size, "LuaScript.RunBuffer") {
-		if !LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET), nil, &err_msg) {
-			return errors.New(err_msg)
-		}
-		return nil
+		_, err = LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET))
+		return
 	}
 
-	err_msg = Lua_tostring(s.handle, -1)
+	err = errors.New(Lua_tostring(s.handle, -1))
 	Lua_pop(s.handle, 1)
-	return errors.New(err_msg)
+	return
 }
 
 //

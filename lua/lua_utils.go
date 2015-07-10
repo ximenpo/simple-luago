@@ -8,6 +8,7 @@ package lua
 import "C"
 
 import (
+	"errors"
 	"reflect"
 	"unsafe"
 )
@@ -34,29 +35,19 @@ func LuaU_SetGlobal(L Lua_State, varname string) bool {
 	return (0 != r)
 }
 
-func LuaU_InvokeFunc(L Lua_State, nargs int, nresults int, err_code *int, err_msg *string) bool {
-	var ret int
-	if nil != err_msg {
-		*err_msg = ""
-	}
-	if nil == err_code {
-		err_code = &ret
-	}
-
-	switch *err_code = int(Lua_pcall(L, Lua_CInt(nargs), Lua_CInt(nresults), 0)); Lua_CInt(*err_code) {
+func LuaU_InvokeFunc(L Lua_State, nargs int, nresults int) (ret int, err error) {
+	switch ret = int(Lua_pcall(L, Lua_CInt(nargs), Lua_CInt(nresults), 0)); Lua_CInt(ret) {
 	case LUA_OK, LUA_YIELD:
 		{
-			return true
+			return
 		}
 	default:
 		{
-			if nil != err_msg {
-				*err_msg = Lua_tostring(L, -1)
-			}
+			err = errors.New(Lua_tostring(L, -1))
 			Lua_pop(L, 1)
 		}
 	}
-	return false
+	return
 }
 
 func LuaU_PushVar(L Lua_State, value interface{}) bool {
