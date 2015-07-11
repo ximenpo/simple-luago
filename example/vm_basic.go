@@ -53,7 +53,7 @@ func luascript_Reference(s *lua.LuaVM) {
 		fmt.Println("ERROR => remove var failed")
 	}
 	if !s.HasRef(ref) {
-		fmt.Println("ERROR => must NOT has reference")
+		fmt.Println("ERROR => must has reference")
 	}
 }
 
