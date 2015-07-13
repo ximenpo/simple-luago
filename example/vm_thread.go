@@ -17,8 +17,8 @@ func callfunction(f func(s *lua.LuaThreadMgr)) {
 
 	mgr.OpenStdLibs()
 	mgr.OpenScriptLib()
-	if 0 != lua.Lua_gettop(mgr.GetHandle()) {
-		fmt.Println("STACK: ", lua.Lua_gettop(mgr.GetHandle()))
+	if 0 != lua.Lua_gettop(mgr.Handle) {
+		fmt.Println("STACK: ", lua.Lua_gettop(mgr.Handle))
 	}
 
 	f(&mgr)
@@ -34,8 +34,8 @@ func luascript_Test(m *lua.LuaThreadMgr) {
 func luascript_Demo(m *lua.LuaThreadMgr) {
 	s := m.CreateThread(true)
 
-	if 0 != lua.Lua_gettop(s.GetHandle()) {
-		fmt.Println("STACK: ", lua.Lua_gettop(s.GetHandle()))
+	if 0 != lua.Lua_gettop(s.Handle) {
+		fmt.Println("STACK: ", lua.Lua_gettop(s.Handle))
 	}
 	if 1 != m.GetThreadSum() {
 		fmt.Println("#thread sum: ", m.GetThreadSum(), "!=", 1)
@@ -44,8 +44,8 @@ func luascript_Demo(m *lua.LuaThreadMgr) {
 	if err := s.RunString("print('hello, world')"); err != nil {
 		fmt.Println(err)
 	}
-	if 0 != lua.Lua_gettop(s.GetHandle()) {
-		fmt.Println("STACK: ", lua.Lua_gettop(s.GetHandle()))
+	if 0 != lua.Lua_gettop(s.Handle) {
+		fmt.Println("STACK: ", lua.Lua_gettop(s.Handle))
 	}
 
 	m.Update(0.0)
@@ -57,16 +57,16 @@ func luascript_Demo(m *lua.LuaThreadMgr) {
 func luascript_WaitFrames(m *lua.LuaThreadMgr) {
 	s := m.CreateThread(true)
 
-	if 0 != lua.Lua_gettop(s.GetHandle()) {
-		fmt.Println("STACK 1: ", lua.Lua_gettop(s.GetHandle()))
+	if 0 != lua.Lua_gettop(s.Handle) {
+		fmt.Println("STACK 1: ", lua.Lua_gettop(s.Handle))
 	}
 	if 1 != m.GetThreadSum() {
 		fmt.Println("#thread sum: ", m.GetThreadSum(), "!=", 1)
 	}
 
 	s.RunString("print('#1');script.WaitFrames(3);print('#2');")
-	if 0 != lua.Lua_gettop(s.GetHandle()) {
-		fmt.Println("STACK 2: ", lua.Lua_gettop(s.GetHandle()))
+	if 0 != lua.Lua_gettop(s.Handle) {
+		fmt.Println("STACK 2: ", lua.Lua_gettop(s.Handle))
 	}
 	if 1 != m.GetThreadSum() {
 		fmt.Println("#thread sum: ", m.GetThreadSum(), "!=", 1)
@@ -92,16 +92,16 @@ func luascript_WaitFrames(m *lua.LuaThreadMgr) {
 func luascript_WaitSeconds(m *lua.LuaThreadMgr) {
 	s := m.CreateThread(true)
 
-	if 0 != lua.Lua_gettop(s.GetHandle()) {
-		fmt.Println("STACK 1: ", lua.Lua_gettop(s.GetHandle()))
+	if 0 != lua.Lua_gettop(s.Handle) {
+		fmt.Println("STACK 1: ", lua.Lua_gettop(s.Handle))
 	}
 	if 1 != m.GetThreadSum() {
 		fmt.Println("#thread sum: ", m.GetThreadSum(), "!=", 1)
 	}
 
 	s.RunString("print('#1');script.WaitSeconds(3.1);print('#2');")
-	if 0 != lua.Lua_gettop(s.GetHandle()) {
-		fmt.Println("STACK 2: ", lua.Lua_gettop(s.GetHandle()))
+	if 0 != lua.Lua_gettop(s.Handle) {
+		fmt.Println("STACK 2: ", lua.Lua_gettop(s.Handle))
 	}
 	if 1 != m.GetThreadSum() {
 		fmt.Println("#thread sum: ", m.GetThreadSum(), "!=", 1)

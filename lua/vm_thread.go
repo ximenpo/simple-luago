@@ -51,79 +51,79 @@ type LuaThreadMgr struct {
 }
 
 func NewLuaThreadMgr() *LuaThreadMgr {
-	m := &LuaThreadMgr{}
-	return m
+	self := &LuaThreadMgr{}
+	return self
 }
 
-func (m *LuaThreadMgr) Start(vm *LuaVM) error {
-	if nil != m.LuaVM {
+func (self *LuaThreadMgr) Start(vm *LuaVM) error {
+	if nil != self.LuaVM {
 		return errors.New("vm already exist")
 	}
 
-	m.LuaVM = vm
-	m.threads = map[*LuaThread]bool{}
+	self.LuaVM = vm
+	self.threads = map[*LuaThread]bool{}
 	return nil
 }
 
-func (m *LuaThreadMgr) Stop() {
-	for k := range m.threads {
-		delete(m.threads, k)
+func (self *LuaThreadMgr) Stop() {
+	for k := range self.threads {
+		delete(self.threads, k)
 	}
-	m.LuaVM = nil
+	self.LuaVM = nil
 }
 
-func (m *LuaThreadMgr) CreateThread(bAutoDelete bool) *LuaThread {
-	if m.LuaVM == nil || m.handle == nil {
+func (self *LuaThreadMgr) CreateThread(bAutoDelete bool) *LuaThread {
+	if self.LuaVM == nil || self.Handle == nil {
 		return nil
 	}
 
 	t := new(LuaThread)
-	t.handle = Lua_newthread(m.handle)
+	t.Handle = Lua_newthread(self.Handle)
 	t.auto_delete = bAutoDelete
-	if nil == t.handle {
-		t.handle = nil
+	if nil == t.Handle {
+		t.Handle = nil
 		return nil
 	}
 
-	Lua_pushglobaltable(t.handle)
-	Lua_pushthread(t.handle)
-	Lua_pushlightuserdata(t.handle, uintptr(unsafe.Pointer(t)))
-	Lua_settable(t.handle, -3)
-	Lua_pop(t.handle, 1)
+	Lua_pushglobaltable(t.Handle)
+	Lua_pushthread(t.Handle)
+	Lua_pushlightuserdata(t.Handle, uintptr(unsafe.Pointer(t)))
+	Lua_settable(t.Handle, -3)
+	Lua_pop(t.Handle, 1)
 
-	m.threads[t] = true
+	self.threads[t] = true
 	return t
 }
 
-func (m *LuaThreadMgr) DestroyThread(t *LuaThread) {
-	if _, ok := m.threads[t]; ok {
-		m.threads[t] = false
+func (self *LuaThreadMgr) DestroyThread(t *LuaThread) {
+	if _, ok := self.threads[t]; ok {
+		self.threads[t] = false
 	}
 }
 
-func (m *LuaThreadMgr) IsValidThread(t *LuaThread) bool {
-	todel, ok := m.threads[t]
+func (self *LuaThreadMgr) IsValidThread(t *LuaThread) bool {
+	todel, ok := self.threads[t]
 	return ok && todel
 }
 
-func (m *LuaThreadMgr) GetThreadSum() int {
-	return len(m.threads)
+func (self *LuaThreadMgr) GetThreadSum() int {
+	return len(self.threads)
 }
 
-func (m *LuaThreadMgr) OpenScriptLib() {
-	if nil != m.LuaVM && nil != m.handle {
-		LuaL_newlib(m.handle, C.script_funcs())
-		Lua_setglobal(m.handle, "script")
+func (self *LuaThreadMgr) OpenScriptLib() {
+	if nil != self.LuaVM && nil != self.Handle {
+		LuaL_newlib(self.Handle, C.script_funcs())
+		Lua_setglobal(self.Handle, "script")
 	}
 }
 
-func (m *LuaThreadMgr) Update(dt float64) {
+func (self *LuaThreadMgr) Update(dt float64) {
 	var dead []*LuaThread
 
-	for t, v := range m.threads {
+	for t, v := range self.threads {
 		if !v {
 			if dead == nil {
-				dead = make([]*LuaThread, 0, len(m.threads))
+				dead = make([]*LuaThread, 0, len(self.threads))
 			}
 			dead = append(dead, t)
 			continue
@@ -134,7 +134,7 @@ func (m *LuaThreadMgr) Update(dt float64) {
 		case THREAD_DONE, THREAD_ERROR, THREAD_NOT_LOADED:
 			if t.auto_delete {
 				if dead == nil {
-					dead = make([]*LuaThread, 0, len(m.threads))
+					dead = make([]*LuaThread, 0, len(self.threads))
 				}
 				dead = append(dead, t)
 			}
@@ -143,7 +143,7 @@ func (m *LuaThreadMgr) Update(dt float64) {
 
 	if dead != nil {
 		for i := range dead {
-			delete(m.threads, dead[i])
+			delete(self.threads, dead[i])
 		}
 	}
 }
@@ -161,21 +161,21 @@ type LuaThread struct {
 	frames_wakeup    int     // number of frames to wait
 }
 
-func (t *LuaThread) update(dt float64) (err error) {
-	t.timestamp += float64(dt)
+func (self *LuaThread) update(dt float64) (err error) {
+	self.timestamp += float64(dt)
 
-	switch t.status {
+	switch self.status {
 	case THREAD_WAIT_SECONDS:
 		{ // 脚本等待多少秒
-			if t.timestamp >= t.timestamp_wakeup {
-				err = t.resume(false)
+			if self.timestamp >= self.timestamp_wakeup {
+				err = self.resume(false)
 			}
 		}
 	case THREAD_WAIT_FRAMES:
 		{ // 脚本等待多少帧
-			t.frames_wakeup--
-			if t.frames_wakeup <= 0 {
-				err = t.resume(false)
+			self.frames_wakeup--
+			if self.frames_wakeup <= 0 {
+				err = self.resume(false)
 			}
 		}
 	}
@@ -183,8 +183,8 @@ func (t *LuaThread) update(dt float64) (err error) {
 	return
 }
 
-func (t *LuaThread) resume(bAbortWait bool) error {
-	switch t.status {
+func (self *LuaThread) resume(bAbortWait bool) error {
+	switch self.status {
 	case THREAD_NOT_LOADED:
 		{
 			return errors.New("thread not loaded")
@@ -196,16 +196,16 @@ func (t *LuaThread) resume(bAbortWait bool) error {
 	}
 
 	// we're about to run/resume the thread, so set the global
-	t.status = THREAD_RUNNING
+	self.status = THREAD_RUNNING
 
 	// param is treated as a return value from the function that yielded
-	Lua_pushboolean(t.handle, bAbortWait)
+	Lua_pushboolean(self.Handle, bAbortWait)
 
 	var err_msg string
-	switch Lua_resume(t.handle, nil, 1) {
+	switch Lua_resume(self.Handle, nil, 1) {
 	case LUA_OK:
 		{
-			t.status = THREAD_DONE
+			self.status = THREAD_DONE
 			return nil
 		}
 	case LUA_YIELD:
@@ -215,76 +215,76 @@ func (t *LuaThread) resume(bAbortWait bool) error {
 		break
 	default:
 		{
-			t.status = THREAD_ERROR
-			err_msg = Lua_tostring(t.handle, -1)
-			Lua_pop(t.handle, -1)
+			self.status = THREAD_ERROR
+			err_msg = Lua_tostring(self.Handle, -1)
+			Lua_pop(self.Handle, -1)
 		}
 	}
 
 	return errors.New(err_msg)
 }
 
-func (t *LuaThread) GetMgr() *LuaThreadMgr {
-	return t.mgr
+func (self *LuaThread) GetMgr() *LuaThreadMgr {
+	return self.mgr
 }
 
-func (t *LuaThread) GetStatus() int {
-	return t.status
+func (self *LuaThread) GetStatus() int {
+	return self.status
 }
 
-func (t *LuaThread) GetAutoDelete() bool {
-	return t.auto_delete
+func (self *LuaThread) GetAutoDelete() bool {
+	return self.auto_delete
 }
 
-func (t *LuaThread) SetAutoDelete(bAutoDelete bool) {
-	t.auto_delete = bAutoDelete
+func (self *LuaThread) SetAutoDelete(bAutoDelete bool) {
+	self.auto_delete = bAutoDelete
 }
 
-func (t *LuaThread) RunFile(file string) error {
-	t.status = THREAD_NOT_LOADED
+func (self *LuaThread) RunFile(file string) error {
+	self.status = THREAD_NOT_LOADED
 
-	if LUA_OK == LuaL_loadfile(t.handle, file) {
-		t.status = THREAD_LOADED
-		return t.resume(false)
+	if LUA_OK == LuaL_loadfile(self.Handle, file) {
+		self.status = THREAD_LOADED
+		return self.resume(false)
 	}
 
-	t.status = THREAD_NOT_LOADED
-	err_msg := Lua_tostring(t.handle, -1)
-	Lua_pop(t.handle, 1)
+	self.status = THREAD_NOT_LOADED
+	err_msg := Lua_tostring(self.Handle, -1)
+	Lua_pop(self.Handle, 1)
 
 	return errors.New(err_msg)
 }
 
-func (t *LuaThread) RunString(code string) error {
-	t.status = THREAD_NOT_LOADED
+func (self *LuaThread) RunString(code string) error {
+	self.status = THREAD_NOT_LOADED
 
-	if LUA_OK != LuaL_loadstring(t.handle, code) {
-		err_msg := Lua_tostring(t.handle, -1)
-		Lua_pop(t.handle, 1)
+	if LUA_OK != LuaL_loadstring(self.Handle, code) {
+		err_msg := Lua_tostring(self.Handle, -1)
+		Lua_pop(self.Handle, 1)
 		return errors.New(err_msg)
 	}
 
-	t.status = THREAD_LOADED
+	self.status = THREAD_LOADED
 
-	return t.resume(false)
+	return self.resume(false)
 }
 
-func (t *LuaThread) RunBuffer(buffer unsafe.Pointer, size uint) error {
-	t.status = THREAD_NOT_LOADED
+func (self *LuaThread) RunBuffer(buffer unsafe.Pointer, size uint) error {
+	self.status = THREAD_NOT_LOADED
 
-	if LUA_OK != LuaL_loadbuffer(t.handle, uintptr(buffer), size, "LuaThread.RunBuffer") {
-		err_msg := Lua_tostring(t.handle, -1)
-		Lua_pop(t.handle, 1)
+	if LUA_OK != LuaL_loadbuffer(self.Handle, uintptr(buffer), size, "LuaThread.RunBuffer") {
+		err_msg := Lua_tostring(self.Handle, -1)
+		Lua_pop(self.Handle, 1)
 		return errors.New(err_msg)
 	}
 
-	t.status = THREAD_LOADED
+	self.status = THREAD_LOADED
 
-	return t.resume(false)
+	return self.resume(false)
 }
 
-func (t *LuaThread) AbortWait() {
-	t.resume(true)
+func (self *LuaThread) AbortWait() {
+	self.resume(true)
 }
 
 //

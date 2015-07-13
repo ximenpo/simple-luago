@@ -11,85 +11,77 @@ import (
 //	LuaScript
 //
 type LuaScript struct {
-	handle Lua_State
+	Handle Lua_State
 }
 
-func (s *LuaScript) GetHandle() Lua_State {
-	return s.handle
-}
-
-func (s *LuaScript) SetHandle(l Lua_State) {
-	s.handle = l
-}
-
-func (s *LuaScript) OpenStdLibs() {
-	if nil != s.handle {
-		LuaL_openlibs(s.handle)
+func (self *LuaScript) OpenStdLibs() {
+	if nil != self.Handle {
+		LuaL_openlibs(self.Handle)
 	}
 }
 
-func (s *LuaScript) HasRef(ref Lua_Ref) bool {
-	if !LuaU_GetRef(s.handle, ref) {
+func (self *LuaScript) HasRef(ref Lua_Ref) bool {
+	if !LuaU_GetRef(self.Handle, ref) {
 		return false
 	}
 
-	R := !Lua_isnoneornil(s.handle, -1)
-	Lua_pop(s.handle, 1)
+	R := !Lua_isnoneornil(self.Handle, -1)
+	Lua_pop(self.Handle, 1)
 	return R
 }
 
-func (s *LuaScript) Ref(var_name string) (ref Lua_Ref, ok bool) {
+func (self *LuaScript) Ref(var_name string) (ref Lua_Ref, ok bool) {
 	ref = Lua_Ref(LUA_NOREF)
-	if !LuaU_GetGlobal(s.handle, var_name) {
+	if !LuaU_GetGlobal(self.Handle, var_name) {
 		return ref, false
 	}
 
-	if ok = !Lua_isnoneornil(s.handle, -1); ok {
-		ref = Lua_Ref(LuaL_ref(s.handle, LUA_REGISTRYINDEX))
+	if ok = !Lua_isnoneornil(self.Handle, -1); ok {
+		ref = Lua_Ref(LuaL_ref(self.Handle, LUA_REGISTRYINDEX))
 	} else {
-		Lua_pop(s.handle, 1)
+		Lua_pop(self.Handle, 1)
 	}
 	return
 }
 
-func (s *LuaScript) UnRef(ref Lua_Ref) bool {
-	LuaL_unref(s.handle, LUA_REGISTRYINDEX, Lua_CInt(ref))
+func (self *LuaScript) UnRef(ref Lua_Ref) bool {
+	LuaL_unref(self.Handle, LUA_REGISTRYINDEX, Lua_CInt(ref))
 
 	return true
 }
 
-func (s *LuaScript) LoadRef(ref Lua_Ref) bool {
-	return LuaU_GetRef(s.handle, ref)
+func (self *LuaScript) LoadRef(ref Lua_Ref) bool {
+	return LuaU_GetRef(self.Handle, ref)
 }
 
-func (s *LuaScript) HasVar(var_name string) bool {
-	if !LuaU_GetGlobal(s.handle, var_name) {
+func (self *LuaScript) HasVar(var_name string) bool {
+	if !LuaU_GetGlobal(self.Handle, var_name) {
 		return false
 	}
 
-	R := !Lua_isnoneornil(s.handle, -1)
-	Lua_pop(s.handle, 1)
+	R := !Lua_isnoneornil(self.Handle, -1)
+	Lua_pop(self.Handle, 1)
 	return R
 }
 
-func (s *LuaScript) RemoveVar(var_name string) bool {
-	Lua_pushnil(s.handle)
-	if !LuaU_SetGlobal(s.handle, var_name) {
-		Lua_pop(s.handle, 1)
+func (self *LuaScript) RemoveVar(var_name string) bool {
+	Lua_pushnil(self.Handle)
+	if !LuaU_SetGlobal(self.Handle, var_name) {
+		Lua_pop(self.Handle, 1)
 		return false
 	}
 	return true
 }
 
-func (s *LuaScript) GetVar(var_name string, value interface{}) bool {
-	return s.GetObject(var_name, value, true)
+func (self *LuaScript) GetVar(var_name string, value interface{}) bool {
+	return self.GetObject(var_name, value, true)
 }
 
-func (s *LuaScript) SetVar(var_name string, value interface{}) bool {
-	return s.SetObject(var_name, value, false)
+func (self *LuaScript) SetVar(var_name string, value interface{}) bool {
+	return self.SetObject(var_name, value, false)
 }
 
-func (s *LuaScript) GetObject(var_name string, value interface{}, ignore_nonexistent_field bool) bool {
+func (self *LuaScript) GetObject(var_name string, value interface{}, ignore_nonexistent_field bool) bool {
 	r := reflect.ValueOf(value)
 	if r.Kind() != reflect.Ptr {
 		return false
@@ -100,54 +92,54 @@ func (s *LuaScript) GetObject(var_name string, value interface{}, ignore_nonexis
 		return false
 	}
 
-	if !LuaU_GetGlobal(s.handle, var_name) {
+	if !LuaU_GetGlobal(self.Handle, var_name) {
 		return false
 	}
 
-	return LuaU_FetchVar(s.handle, value, ignore_nonexistent_field)
+	return LuaU_FetchVar(self.Handle, value, ignore_nonexistent_field)
 }
 
-func (s *LuaScript) SetObject(var_name string, value interface{}, keep_nonexistent_field bool) bool {
+func (self *LuaScript) SetObject(var_name string, value interface{}, keep_nonexistent_field bool) bool {
 	if !keep_nonexistent_field {
-		s.RemoveVar(var_name)
+		self.RemoveVar(var_name)
 	}
 
-	if !LuaU_PushVar(s.handle, value) {
+	if !LuaU_PushVar(self.Handle, value) {
 		return false
 	}
 
-	if !LuaU_SetGlobal(s.handle, var_name) {
-		Lua_pop(s.handle, 1)
+	if !LuaU_SetGlobal(self.Handle, var_name) {
+		Lua_pop(self.Handle, 1)
 		return false
 	}
 
 	return true
 }
 
-func (s *LuaScript) Call(func_name string, args ...interface{}) (err error) {
-	if !LuaU_GetGlobal(s.handle, func_name) {
+func (self *LuaScript) Call(func_name string, args ...interface{}) (err error) {
+	if !LuaU_GetGlobal(self.Handle, func_name) {
 		return errors.New("can't find function " + func_name)
 	}
 
 	for i := 0; i < len(args); i++ {
-		if !LuaU_PushVar(s.handle, args[i]) {
-			Lua_pop(s.handle, Lua_CInt(i+1)) // 0, 1, .. i - 1, + LuaU_GetGlobal
+		if !LuaU_PushVar(self.Handle, args[i]) {
+			Lua_pop(self.Handle, Lua_CInt(i+1)) // 0, 1, .. i - 1, + LuaU_GetGlobal
 			return errors.New(fmt.Sprintf("push param [%d] failed", i))
 		}
 	}
 
-	_, err = LuaU_InvokeFunc(s.handle, len(args), 0)
+	_, err = LuaU_InvokeFunc(self.Handle, len(args), 0)
 	return
 }
 
-func (s *LuaScript) Invoke(ret_value interface{}, func_name string, args ...interface{}) (err error) {
-	if !LuaU_GetGlobal(s.handle, func_name) {
+func (self *LuaScript) Invoke(ret_value interface{}, func_name string, args ...interface{}) (err error) {
+	if !LuaU_GetGlobal(self.Handle, func_name) {
 		return errors.New("can't find function " + func_name)
 	}
 
 	for i := 0; i < len(args); i++ {
-		if !LuaU_PushVar(s.handle, args[i]) {
-			Lua_pop(s.handle, Lua_CInt(i+1)) // 0, 1, .. i - 1, + LuaU_GetGlobal
+		if !LuaU_PushVar(self.Handle, args[i]) {
+			Lua_pop(self.Handle, Lua_CInt(i+1)) // 0, 1, .. i - 1, + LuaU_GetGlobal
 			return errors.New(fmt.Sprintf("push param [%d] failed", i))
 		}
 	}
@@ -157,47 +149,47 @@ func (s *LuaScript) Invoke(ret_value interface{}, func_name string, args ...inte
 		retsum = 1
 	}
 
-	if _, err = LuaU_InvokeFunc(s.handle, len(args), retsum); err != nil {
+	if _, err = LuaU_InvokeFunc(self.Handle, len(args), retsum); err != nil {
 		return
 	}
 
-	if (nil != ret_value) && !LuaU_FetchVar(s.handle, ret_value, true) {
+	if (nil != ret_value) && !LuaU_FetchVar(self.Handle, ret_value, true) {
 		return errors.New("fetch function result failed")
 	}
 
 	return nil
 }
 
-func (s *LuaScript) RunFile(file string) (err error) {
-	if R := LuaL_loadfile(s.handle, file); LUA_OK != R {
-		err = errors.New(Lua_tostring(s.handle, -1))
-		Lua_pop(s.handle, 1)
+func (self *LuaScript) RunFile(file string) (err error) {
+	if R := LuaL_loadfile(self.Handle, file); LUA_OK != R {
+		err = errors.New(Lua_tostring(self.Handle, -1))
+		Lua_pop(self.Handle, 1)
 		return
 	}
 
-	_, err = LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET))
+	_, err = LuaU_InvokeFunc(self.Handle, 0, int(LUA_MULTRET))
 	return
 }
 
-func (s *LuaScript) RunString(code string) (err error) {
-	if R := LuaL_loadstring(s.handle, code); LUA_OK != R {
-		err = errors.New(Lua_tostring(s.handle, -1))
-		Lua_pop(s.handle, 1)
+func (self *LuaScript) RunString(code string) (err error) {
+	if R := LuaL_loadstring(self.Handle, code); LUA_OK != R {
+		err = errors.New(Lua_tostring(self.Handle, -1))
+		Lua_pop(self.Handle, 1)
 		return
 	}
 
-	_, err = LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET))
+	_, err = LuaU_InvokeFunc(self.Handle, 0, int(LUA_MULTRET))
 	return
 }
 
-func (s *LuaScript) RunBuffer(buffer unsafe.Pointer, size uint) (err error) {
-	if LUA_OK == LuaL_loadbuffer(s.handle, uintptr(buffer), size, "LuaScript.RunBuffer") {
-		_, err = LuaU_InvokeFunc(s.handle, 0, int(LUA_MULTRET))
+func (self *LuaScript) RunBuffer(buffer unsafe.Pointer, size uint) (err error) {
+	if LUA_OK == LuaL_loadbuffer(self.Handle, uintptr(buffer), size, "LuaScript.RunBuffer") {
+		_, err = LuaU_InvokeFunc(self.Handle, 0, int(LUA_MULTRET))
 		return
 	}
 
-	err = errors.New(Lua_tostring(s.handle, -1))
-	Lua_pop(s.handle, 1)
+	err = errors.New(Lua_tostring(self.Handle, -1))
+	Lua_pop(self.Handle, 1)
 	return
 }
 
@@ -209,20 +201,20 @@ type LuaVM struct {
 }
 
 func NewLuaVM() *LuaVM {
-	vm := &LuaVM{}
-	return vm
+	self := &LuaVM{}
+	return self
 }
 
-func (vm *LuaVM) Start() {
-	if vm.handle != nil {
-		Lua_close(vm.handle)
+func (self *LuaVM) Start() {
+	if self.Handle != nil {
+		Lua_close(self.Handle)
 	}
 
-	vm.handle = LuaL_newstate()
+	self.Handle = LuaL_newstate()
 }
 
-func (vm *LuaVM) Stop() {
-	if vm.handle != nil {
-		Lua_close(vm.handle)
+func (self *LuaVM) Stop() {
+	if self.Handle != nil {
+		Lua_close(self.Handle)
 	}
 }
